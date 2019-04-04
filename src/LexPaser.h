@@ -1,19 +1,24 @@
+
+#ifndef LEX_PASER_H
+#define LEX_PASER_H
+
 #include <iostream>
 #include <vector>
 #include <string>
-#include <stdio.h>
+
 using namespace std;
 
-const char* KEYW[] = {"else","if","int","return","void","while"};
-const char OP[] = {'+','-','*','/','<','=','>','!',';',',','(',')','[',']','{','}'};
+extern string KEN[];
+extern char OP[];
 
 typedef struct{
-    string type;
+    string s_type; //指定
+    unsigned int u_line;
     union{
-         int i_num;
-	 string s_key;
-	 string s_id;
-	 string s_op;
+        int i_num;
+        string s_key;
+        string s_id;
+        string s_op;
     };
 }Token;
 
@@ -21,7 +26,8 @@ class LexPaser
 {
 private:
     vector<Token> tokens;
-    FILE* fp;
 public:
-    LexPaser(char* filepath)
+    LexPaser(const string &filepath);
 };
+
+#endif
