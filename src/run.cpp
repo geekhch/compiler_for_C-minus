@@ -13,6 +13,7 @@ int main(int argv, char* args[])
     LexPaser paser(args[1]);
     //input commands
     showMenu();
+    stars();
     char cmd;
     while(cin>>cmd,cmd!='q')
     {
@@ -21,6 +22,7 @@ int main(int argv, char* args[])
             case 'p': paser.printCode(); break;
             case 'h': showMenu(); break;
             case 't': paser.printTokenList();break;
+            case 'n': cout<<paser.nextToken().strfToken()<<endl;break;
         }
         stars();
     }
@@ -38,5 +40,6 @@ void showMenu()
     printf("t    print token lists\n");
     printf("p    print the raw code\n");
     printf("h    print this showMenu\n");
+    printf("n    print next token");
     printf("q    quit\n");
 }

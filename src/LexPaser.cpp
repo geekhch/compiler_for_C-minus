@@ -108,6 +108,7 @@ void LexPaser::parseToken()
     {
         //跳过空白符
         if(isblank(s_code[i])) continue;
+        
         //进入int类型状态转换图
         if(isdigit(s_code[i])){
             int j=0;
