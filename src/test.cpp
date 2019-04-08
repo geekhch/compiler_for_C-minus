@@ -13,7 +13,10 @@ private:
 
 int main()
 {
-    vector<string> type{"hello","yes"};
-    cout << type[0]<<endl;
+    char s[50];
+    string nstr("hello");
+    sprintf(s,"<%20s>",nstr.c_str());
+    sprintf(s,"<%20s>","gg");
+    cout << s << endl;
     return 0;
 }

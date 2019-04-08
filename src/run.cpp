@@ -20,6 +20,7 @@ int main(int argv, char* args[])
         {
             case 'p': paser.printCode(); break;
             case 'h': showMenu(); break;
+            case 't': paser.printTokenList();break;
         }
         stars();
     }
@@ -34,7 +35,6 @@ void stars()
 
 void showMenu()
 {
-    printf("c    print token numbers\n");
     printf("t    print token lists\n");
     printf("p    print the raw code\n");
     printf("h    print this showMenu\n");
