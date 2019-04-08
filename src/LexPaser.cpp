@@ -113,6 +113,7 @@ void LexPaser::parseToken()
             int j=0;
             TokenBuffer[j++] = s_code[i];
             while(i<strlen(s_code)-1 && isdigit(s_code[i+1])) {TokenBuffer[j++] = s_code[i+1]; i++;}; //预读一个字符,并判断是否到达流尾
+            if(isalpha(s_code[i+1])) throw runtime_error("illegal lexical!");
             TokenBuffer[j] = '\0';
             addTokenInt(TokenBuffer);
             continue;
@@ -140,7 +141,7 @@ void LexPaser::parseToken()
         }
 
         //异常
-        //pass
+        throw runtime_error("thers is an illegal charactor!");
     }
 }
 
