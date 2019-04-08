@@ -5,29 +5,39 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#define BUFFER_SIZE 10240
 
 using namespace std;
 
-extern string KEN[];
-extern char OP[];
+extern const string KEN[];
+extern const char OPS[];
+enum TYPE{KEY, INT, ID, OP, PUNCT};
 
-typedef struct{
-    string s_type; //指定
-    unsigned int u_line;
-    union{
-        int i_num;
-        string s_key;
-        string s_id;
-        string s_op;
-    };
-}Token;
+class Token
+{
+public:
+    TYPE type;
+    int i_value;
+    string s_value;
+
+
+    Token(TYPE type, int value);
+    Token(TYPE type, string value);
+};
 
 class LexPaser
 {
 private:
     vector<Token> tokens;
+    ifstream f_code;
+    void preParse();
+    char s_code[BUFFER_SIZE]; //最大支持1MB源代码
+    
 public:
-    LexPaser(const string &filepath);
+    LexPaser(const string&);
+    ~LexPaser();
+    void printCode();
 };
 
 #endif
