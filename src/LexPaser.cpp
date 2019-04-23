@@ -5,16 +5,18 @@ extern const string KEYW[] = {"else", "if", "int", "return", "void", "while"};
 extern const char OPS[] = {'+', '-', '*', '/', '<', '=', '>', '!', ';', ',', '(', ')', '[', ']', '{', '}'};
 
 
-Token::Token(TYPE type, const long value)
+Token::Token(TYPE type, const long value, int line)
 {
     this->type = type;
     this->i_value = value;
+    this->line = line;
 }
 
-Token::Token(TYPE type, const string &value)
+Token::Token(TYPE type, const string &value, int line)
 {
     this->type = type;
     this->s_value = value;
+    this->line = line;
 }
 
 string Token::strfToken()
@@ -22,17 +24,17 @@ string Token::strfToken()
     static char tokenString[100];
     if(type == INT)
     {
-        sprintf(tokenString,"< %1d   %d >",type,i_value);
+        sprintf(tokenString,"< %1d   %d   %d>",type,i_value,line);
     }else
     {
-        sprintf(tokenString,"< %1d   %s >",type,s_value.c_str());
+        sprintf(tokenString,"< %1d   %s   %d>",type,s_value.c_str(),line);
     }
     return string(tokenString);
 }
 
 LexPaser::LexPaser(const string &filepath)
 {
-    //½«Ô´´úÂë¶ÁÈ¡µ½»º³åÇø
+    //å°†æºä»£ç è¯»å–åˆ°ç¼“å†²åŒº
     f_code.open(filepath);
     char tmp;
     int cursor=0;
@@ -41,15 +43,17 @@ LexPaser::LexPaser(const string &filepath)
             cout << "Buffer overflow!" << endl;
             exit(-1);
         }
-        // È¥µô×¢ÊÍ
+        // å»æ‰æ³¨é‡Š
         if(cursor>0 && tmp=='*' && s_code[cursor-1]=='/'){
-            isEnd: while((tmp=f_code.get()) != EOF && tmp!='*');
+            cursor -= 1; //å›é€€å»æ‰å‰é¢çš„/æ³¨é‡Šæ ‡è®°
+isEnd:      while((tmp=f_code.get()) != EOF && tmp!='*'){
+                if(tmp=='\n')s_code[cursor++] = '\n';
+            }
             if((tmp=f_code.get())!='/') goto isEnd;
-            cursor -= 1; //»ØÍËÈ¥µôÇ°ÃæµÄ/×¢ÊÍ±ê¼Ç
             continue;
         }
-        // È¥µô»»ĞĞ·û
-        if(tmp != '\n') this->s_code[cursor++] = tmp;
+        // å»æ‰æ¢è¡Œç¬¦
+        this->s_code[cursor++] = tmp;
     }
     s_code[cursor] = '\0';
     f_code.close();
@@ -72,64 +76,72 @@ bool LexPaser::isOperator(char c)
     return false;
 }
 
-void LexPaser::addTokenInt(const char *numStr)
+void LexPaser::addTokenInt(const char *numStr, int line)
 {
     char *endstring;
     long num = strtol(numStr, &endstring, 10);
-    Token token(INT, num);
+    Token token(INT, num, line);
     tokens.push_back(token);
 }
 
-void LexPaser::addTokenWord(const string &word)
+void LexPaser::addTokenWord(const string &word, int line)
 {
-    //Èç¹ûÎª±£Áô×Ö
+    //å¦‚æœä¸ºä¿ç•™å­—
     for(string w:KEYW){
         if(w==word){
-            Token token(KEY, word);
+            Token token(KEY, word, line);
             tokens.push_back(token);
             return;
         }
     }
-    //²»ÊÇ±£Áô×Ö
-    Token token(ID, word);
+    //ä¸æ˜¯ä¿ç•™å­—
+    Token token(ID, word, line);
     tokens.push_back(token);
 }
 
-void LexPaser::addTokenOp(const string &op)
+void LexPaser::addTokenOp(const string &op, int line)
 {
-    Token token(OP, op);
+    Token token(OP, op, line);
     tokens.push_back(token);
 }
 
 void LexPaser::parseToken()
 {
     char TokenBuffer[60];
+    int line = 1;
     for(int i=0; i<strlen(s_code); i++)
     {
-        //Ìø¹ı¿Õ°×·û
+        //è·³è¿‡ç©ºç™½ç¬¦
+        if(s_code[i]=='\n') {++line;continue;}
         if(isblank(s_code[i])) continue;
         
-        //½øÈëintÀàĞÍ×´Ì¬×ª»»Í¼
+        //è¿›å…¥intç±»å‹çŠ¶æ€è½¬æ¢å›¾
         if(isdigit(s_code[i])){
             int j=0;
             TokenBuffer[j++] = s_code[i];
-            while(i<strlen(s_code)-1 && isdigit(s_code[i+1])) {TokenBuffer[j++] = s_code[i+1]; i++;}; //Ô¤¶ÁÒ»¸ö×Ö·û,²¢ÅĞ¶ÏÊÇ·ñµ½´ïÁ÷Î²
-            if(isalpha(s_code[i+1])) throw runtime_error("illegal lexical!");
+            while(i<strlen(s_code)-1 && isdigit(s_code[i+1])) {TokenBuffer[j++] = s_code[i+1]; i++;}; //é¢„è¯»ä¸€ä¸ªå­—ç¬¦,å¹¶åˆ¤æ–­æ˜¯å¦åˆ°è¾¾æµå°¾
+            if(isalpha(s_code[i+1])){
+                TokenBuffer[j++] = s_code[i+1];
+                TokenBuffer[j++] = '\0';
+                char msg[100];
+                sprintf(msg,"line %d: illegal lexical: %s",line, TokenBuffer);
+                throw runtime_error(msg);
+            } 
             TokenBuffer[j] = '\0';
-            addTokenInt(TokenBuffer);
+            addTokenInt(TokenBuffer, line);
             continue;
         }
-        //½øÈë±êÊ¶·ûºÍ¹Ø¼ü×Ö×´Ì¬×ª»»Í¼
+        //è¿›å…¥æ ‡è¯†ç¬¦å’Œå…³é”®å­—çŠ¶æ€è½¬æ¢å›¾
         if(isalpha(s_code[i])){
             int j=0;
             TokenBuffer[j++] = s_code[i];
-            while(i<strlen(s_code)-1 && isalpha(s_code[i+1])) {TokenBuffer[j++] = s_code[i+1]; i++;}; //Ô¤¶ÁÒ»¸ö×Ö·û,²¢ÅĞ¶ÏÊÇ·ñµ½´ïÁ÷Î²
+            while(i<strlen(s_code)-1 && isalpha(s_code[i+1])) {TokenBuffer[j++] = s_code[i+1]; i++;}; //é¢„è¯»ä¸€ä¸ªå­—ç¬¦,å¹¶åˆ¤æ–­æ˜¯å¦åˆ°è¾¾æµå°¾
             TokenBuffer[j] = '\0';
-            addTokenWord(string(TokenBuffer));
+            addTokenWord(string(TokenBuffer), line);
             continue;
         }
 
-        //²Ù×÷·ûÊ¶±ğ
+        //æ“ä½œç¬¦è¯†åˆ«
         if(isOperator(s_code[i])){
             int j=0;
             TokenBuffer[j++] = s_code[i];
@@ -137,12 +149,14 @@ void LexPaser::parseToken()
                 if(i<strlen(s_code)-1 && s_code[i+1]=='=') {TokenBuffer[j++] = s_code[i+1]; i++;};
             }
             TokenBuffer[j] = '\0';
-            addTokenOp(string(TokenBuffer));
+            addTokenOp(string(TokenBuffer), line);
             continue;
         }
 
-        //Òì³£
-        throw runtime_error("thers is an illegal charactor!");
+        //å¼‚å¸¸
+        char msg[100];
+        sprintf(msg,"line %d: thers is an illegal charactor:%c",line, s_code[i]);
+        throw runtime_error(msg);
     }
 }
 
@@ -163,6 +177,6 @@ Token& LexPaser::nextToken()
         return tokens[next];
     }else
     {
-        throw runtime_error("no more tokens!"); //Èç¹ûÒì³£Î´±»catch, ³ÌĞò½«µİ¹éÖÕÖ¹
+        throw runtime_error("no more tokens!"); //å¦‚æœå¼‚å¸¸æœªè¢«catch, ç¨‹åºå°†é€’å½’ç»ˆæ­¢
     }
 }

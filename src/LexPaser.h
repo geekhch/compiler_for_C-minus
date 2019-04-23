@@ -20,11 +20,12 @@ class Token
 public:
     TYPE type;
     long i_value;
+    uint16_t line;
     string s_value;
 
 
-    Token(TYPE type, const long value);
-    Token(TYPE type, const string &value);
+    Token(TYPE type, const long value, int line);
+    Token(TYPE type, const string &value, int line);
     string strfToken();
 };
 
@@ -44,9 +45,9 @@ private:
     bool isOperator(char);
     
     //将Token加入到队列
-    void addTokenInt(const char *);
-    void addTokenWord(const string &);
-    void addTokenOp(const string &);
+    void addTokenInt(const char *, int);
+    void addTokenWord(const string &, int);
+    void addTokenOp(const string &, int);
 
     
 public:
