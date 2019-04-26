@@ -22,12 +22,19 @@ typedef struct{
     };
 }Token;
 
+/*
+* LexPaser每个对象解析一个c-文档，转换为tokens
+*
+*/
 class LexPaser
 {
 private:
     vector<Token> tokens;
+    
 public:
     LexPaser(const string &filepath);
+
+
 };
 
 #endif

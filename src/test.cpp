@@ -2,18 +2,18 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
+#include <set>
+#include <algorithm>
+#include <queue>
 using namespace std;
 
 
-class LexPaser
-{
-private:
-    vector<string> type = {"hello","yes"};
-};
-
 int main()
 {
-    vector<string> type{"hello","yes"};
-    cout << type[0]<<endl;
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    string s;
+    
+    // string::si
     return 0;
 }
