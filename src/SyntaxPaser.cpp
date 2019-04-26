@@ -1,3 +1,6 @@
+#ifndef SYNTAX_PASER_H
+#define SYNTAX_PASER_H
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -52,3 +55,5 @@ private:
     bool args();
     bool arg_list();
 };
+
+#endif
