@@ -5,22 +5,29 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iterator>
+#include <fstream>
+#define BUFFER_SIZE 10240  //最大支持1MB源代码
 
 using namespace std;
 
-extern string KEN[];
-extern char OP[];
+extern const string KEN[];
+extern const char OPS[];
+enum TYPE{KEY, INT, ID, OP, PUNCT};
 
-typedef struct{
-    string s_type; //指定
-    unsigned int u_line;
-    union{
-        int i_num;
-        string s_key;
-        string s_id;
-        string s_op;
-    };
-}Token;
+class Token
+{
+public:
+    TYPE type;
+    long i_value;
+    uint16_t line;
+    string s_value;
+
+
+    Token(TYPE type, const long value, int line);
+    Token(TYPE type, const string &value, int line);
+    string strfToken();
+};
 
 /*
 * LexPaser每个对象解析一个c-文档，转换为tokens
@@ -30,11 +37,30 @@ class LexPaser
 {
 private:
     vector<Token> tokens;
+    ifstream f_code;
+    void preParse();
+    char s_code[BUFFER_SIZE]; 
+    uint32_t cursor = 0;
+
+    //词法分析核心函数自动机解析Token
+    void parseToken();
+    
+    //判断是否为C-的合法操作符
+    bool isOperator(char);
+    
+    //将Token加入到队列
+    void addTokenInt(const char *, int);
+    void addTokenWord(const string &, int);
+    void addTokenOp(const string &, int);
+
     
 public:
-    LexPaser(const string &filepath);
+    LexPaser(const string&);
+    ~LexPaser();
 
-
+    void printCode() const;
+    void printTokenList() const;
+    Token& nextToken();
 };
 
 #endif
