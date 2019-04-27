@@ -1,6 +1,6 @@
 
-#ifndef LEX_PASER_H
-#define LEX_PASER_H
+#ifndef LEX_PARSER_H
+#define LEX_PARSER_H
 
 #include <iostream>
 #include <vector>
@@ -30,10 +30,10 @@ public:
 };
 
 /*
-* LexPaser每个对象解析一个c-文档，转换为tokens
+* LexParser每个对象解析一个c-文档，转换为tokens
 *
 */
-class LexPaser
+class LexParser
 {
 private:
     vector<Token> tokens;
@@ -55,8 +55,8 @@ private:
 
     
 public:
-    LexPaser(const string&);
-    ~LexPaser();
+    LexParser(const string&);
+    ~LexParser();
 
     void printCode() const;
     void printTokenList() const;

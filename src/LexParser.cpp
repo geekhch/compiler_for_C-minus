@@ -1,4 +1,4 @@
-#include "LexPaser.h"
+#include "LexParser.h"
 #include <cstring>
 
 extern const string KEYW[] = {"else", "if", "int", "return", "void", "while"};
@@ -32,7 +32,7 @@ string Token::strfToken()
     return string(tokenString);
 }
 
-LexPaser::LexPaser(const string &filepath)
+LexParser::LexParser(const string &filepath)
 {
     //将源代码读取到缓冲区
     f_code.open(filepath);
@@ -61,14 +61,14 @@ isEnd:      while((tmp=f_code.get()) != EOF && tmp!='*'){
     parseToken();
 }
 
-LexPaser::~LexPaser(){}
+LexParser::~LexParser(){}
 
-void LexPaser::printCode() const
+void LexParser::printCode() const
 {
     cout << s_code << endl;
 }
 
-bool LexPaser::isOperator(char c)
+bool LexParser::isOperator(char c)
 {
     for(char s:OPS){
         if(s==c) return true;
@@ -76,7 +76,7 @@ bool LexPaser::isOperator(char c)
     return false;
 }
 
-void LexPaser::addTokenInt(const char *numStr, int line)
+void LexParser::addTokenInt(const char *numStr, int line)
 {
     char *endstring;
     long num = strtol(numStr, &endstring, 10);
@@ -84,7 +84,7 @@ void LexPaser::addTokenInt(const char *numStr, int line)
     tokens.push_back(token);
 }
 
-void LexPaser::addTokenWord(const string &word, int line)
+void LexParser::addTokenWord(const string &word, int line)
 {
     //如果为保留字
     for(string w:KEYW){
@@ -99,13 +99,13 @@ void LexPaser::addTokenWord(const string &word, int line)
     tokens.push_back(token);
 }
 
-void LexPaser::addTokenOp(const string &op, int line)
+void LexParser::addTokenOp(const string &op, int line)
 {
     Token token(OP, op, line);
     tokens.push_back(token);
 }
 
-void LexPaser::parseToken()
+void LexParser::parseToken()
 {
     char TokenBuffer[60];
     int line = 1;
@@ -160,7 +160,7 @@ void LexPaser::parseToken()
     }
 }
 
-void LexPaser::printTokenList() const
+void LexParser::printTokenList() const
 {
     for(Token token: tokens){
         cout << token.strfToken() << endl;
@@ -168,7 +168,7 @@ void LexPaser::printTokenList() const
     cout << tokens.size() << " tokens in total!" << endl;
 }
 
-Token& LexPaser::nextToken()
+Token& LexParser::nextToken()
 {
     if(cursor<tokens.size())
     {

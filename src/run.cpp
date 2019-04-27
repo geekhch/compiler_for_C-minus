@@ -1,4 +1,4 @@
-#include "LexPaser.h"
+#include "LexParser.h"
 
 void stars();
 void showMenu();
@@ -9,8 +9,8 @@ int main(int argv, char* args[])
         printf("use: %s filename",args[0]);
         exit(0);
     }
-    //call lex paser
-    LexPaser paser(args[1]);
+    //call lex parser
+    LexParser parser(args[1]);
     //input commands
     showMenu();
     stars();
@@ -19,10 +19,10 @@ int main(int argv, char* args[])
     {
         switch(cmd)
         {
-            case 'p': paser.printCode(); break;
+            case 'p': parser.printCode(); break;
             case 'h': showMenu(); break;
-            case 't': paser.printTokenList();break;
-            case 'n': cout<<paser.nextToken().strfToken()<<endl;break;
+            case 't': parser.printTokenList();break;
+            case 'n': cout<<parser.nextToken().strfToken()<<endl;break;
         }
         stars();
     }
