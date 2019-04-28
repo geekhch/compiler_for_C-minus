@@ -180,3 +180,7 @@ Token& LexParser::nextToken()
         throw runtime_error("no more tokens!"); //如果异常未被catch, 程序将递归终止
     }
 }
+
+void LexParser::putBackToken(){
+    --cursor;
+}

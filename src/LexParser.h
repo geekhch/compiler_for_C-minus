@@ -61,6 +61,12 @@ public:
     void printCode() const;
     void printTokenList() const;
     Token& nextToken();
+    void putBackToken();
+
+    //用于Token队列的保存和恢复
+    uint32_t getMarker(){return cursor;}
+    void toMarker(uint32_t marker){cursor = marker;}
+    bool isEnd(){return cursor>=tokens.size();}
 };
 
 #endif
