@@ -618,11 +618,11 @@ void SynParser::factor(SynNode *parent){
         lex.toMarker(mk);
         try{
             call(cur);
-        }catch(runtime_error e){
+        }catch(runtime_error e1){
             lex.toMarker(mk);
             try{
                 var(cur);
-            }catch(runtime_error e){
+            }catch(runtime_error e2){
                 lex.toMarker(mk);
                 if(!match("(",cur)){
                     freeTree(cur);
@@ -630,9 +630,9 @@ void SynParser::factor(SynNode *parent){
                 }else{
                     try{
                         expression(cur);
-                    }catch(runtime_error e){
+                    }catch(runtime_error e3){
                         freeTree(cur);
-                        throw e;
+                        throw e3;
                     }
                     if(!match("(",cur)){
                         freeTree(cur);
