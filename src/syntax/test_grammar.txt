@@ -1,0 +1,9 @@
+S M H
+S a
+H L S o
+H empty
+K d M L
+K empty
+L e H f
+M K
+M b L M

@@ -5,12 +5,13 @@
 #include <string>
 #include <iterator>
 #include <fstream>
-#include "LexParser.h"
+#include "LexParser.hpp"
 using namespace std;
 
 struct SynNode//语法树结点
 {
     string word; //结点内容
+    int type;
     vector<SynNode*> children; //子节点(为空时表示根节点，即终结符)
     // SynNode(string s):word(s){}
 };
@@ -22,6 +23,10 @@ public:
         curNode = root;
         declaration_list(root);
         exception_line=0;
+        step = 1;
+    }
+    ~SynParser(){
+        printTree(root,0);
     }
 
 private:
@@ -29,6 +34,7 @@ private:
     SynNode *curNode;
     LexParser &lex;
     int exception_line;
+    int step;
     bool match(string terminal, SynNode *parent); //匹配终结符
     void freeTree(SynNode *);
     void freeChildren(SynNode *);
@@ -80,6 +86,7 @@ void SynParser::declaration_list(SynNode *parent){
         uint32_t mk = lex.getMarker();
         try{
             declaration(cur);
+            cout << "=====end========"<<endl;
         }catch(runtime_error e){
             if(lex.isEnd()){
                 //没有更多申明
@@ -90,6 +97,7 @@ void SynParser::declaration_list(SynNode *parent){
         }
     }
     parent->children.push_back(cur);
+    printTree(root,0);
 }
 
 void SynParser::declaration(SynNode *parent){
@@ -160,7 +168,6 @@ void SynParser::fun_declaration(SynNode *parent){
         freeTree(cur);
         throw e;
     }
-    printTree(cur,0);
     if(!(match("ID", cur) && match("(",cur))){
         freeTree(cur);
         throw runtime_error("expected an ID");
@@ -441,9 +448,6 @@ void SynParser::expression(SynNode *parent){
     SynNode *cur = new SynNode{"expression"};
     uint32_t mk = lex.getMarker();
     try{
-        simple_expression(cur);
-    }catch(runtime_error e){
-        lex.toMarker(mk);
         try{
             var(cur);
         }catch(runtime_error e){
@@ -460,6 +464,9 @@ void SynParser::expression(SynNode *parent){
             freeTree(cur);
             throw e;
         }
+    }catch(runtime_error e){
+        lex.toMarker(mk);
+        simple_expression(cur);
     }
     parent->children.push_back(cur);
 }
@@ -568,7 +575,9 @@ void SynParser::additive_expression(SynNode *parent){
 }
 void SynParser::addop(SynNode *parent){
     SynNode *cur = new SynNode{"addop"};
+    uint32_t mk = lex.getMarker();
     if(!match("+",cur)){
+        lex.toMarker(mk);
         if(!match("-",cur)){
             throw runtime_error("expected a '+' or '-'");
         }
@@ -603,7 +612,9 @@ void SynParser::term(SynNode *parent){
 }
 void SynParser::mulop(SynNode *parent){
     SynNode *cur = new SynNode{"mulop"};
+    uint32_t mk = lex.getMarker();
     if(!match("*",cur)){
+        lex.toMarker(mk);
         if(!match("/",cur)){
             freeTree(cur);
             throw runtime_error("expected a '*' or '/'");
@@ -713,22 +724,22 @@ void SynParser::freeTree(SynNode *root){
 bool SynParser::match(string terminal, SynNode *parent){
     try{
         Token tk = lex.nextToken();
-        cout << tk.strfToken()<<endl;
+        // cout << "step"<<step++<<": "<< tk.strfToken()<<endl;
         if(terminal=="ID" && tk.type==ID){
-            parent->children.push_back(new SynNode{tk.s_value});
+            parent->children.push_back(new SynNode{tk.s_value,ID});
             return true;
         }else if(terminal=="NUM" && tk.type==INT){
-            parent->children.push_back(new SynNode{to_string(tk.i_value)});
+            parent->children.push_back(new SynNode{to_string(tk.i_value), INT});
             return true;
         }else if(terminal==tk.s_value){
-            parent->children.push_back(new SynNode{tk.s_value});
+            parent->children.push_back(new SynNode{tk.s_value,OP});
             return true;
         }
         exception_line = tk.line;
         return false;
     }catch(runtime_error e){
         //没有新的终结符
-        throw string("$");
+        throw e;
     }
 
 }
@@ -742,11 +753,10 @@ void SynParser::freeChildren(SynNode *parent){
 }
 
 void SynParser::printTree(SynNode *root, int indent=0){
-    if(indent==0)
-        cout << endl << endl;
     for(int i=0;i<indent;++i)
         cout << ' ';
-    cout<< root->word<<endl;
-    for(auto cld:root->children)
+    cout<< TYPE_NAME[root->type]<<": " <<root->word<<endl;
+    for(auto cld:root->children){
         printTree(cld, indent+2);
+    }
 }

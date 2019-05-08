@@ -1,4 +1,4 @@
-#include "LexParser.h"
+#include "LexParser.hpp"
 
 void stars();
 void showMenu();
