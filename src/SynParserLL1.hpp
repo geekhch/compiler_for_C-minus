@@ -75,24 +75,33 @@ SynParser::SynParser(LexParser &lex_) : lex(lex_)
     loadGrammar();
     getFIRST();
     getFOLLOW();
-
+    genParseTable();
+    //输出分析表
+    // for(auto it=table.begin();it!=table.end();++it){
+    //     cout << it->first<<endl;
+    //     for(auto at=it->second.begin();at != it->second.end();++at){
+    //         cout << at->first<<' '<<at->second<<"   ";
+    //     }
+    //     cout << endl;
+    // }
+    
     //输出first follow语法结果
-    cout <<"first:"<<endl;
-    for(auto it=FIRST.begin();it!=FIRST.end();++it){
-        cout <<it->first<<": ";
-        for(auto u:it->second){
-            cout <<u.word<<u.from<<" ";
-        }
-        cout << endl;
-    }
-    cout << endl <<"follow:"<<endl;
-    for(auto it=FOLLOW.begin();it!=FOLLOW.end();++it){
-        cout <<it->first<<": ";
-        for(auto u:it->second){
-            cout <<u.word<<" ";
-        }
-        cout << endl;
-    }
+    // cout <<"first:"<<endl;
+    // for(auto it=FIRST.begin();it!=FIRST.end();++it){
+    //     cout <<it->first<<": ";
+    //     for(auto u:it->second){
+    //         cout <<u.word<<u.from<<" ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << endl <<"follow:"<<endl;
+    // for(auto it=FOLLOW.begin();it!=FOLLOW.end();++it){
+    //     cout <<it->first<<": ";
+    //     for(auto u:it->second){
+    //         cout <<u.word<<" ";
+    //     }
+    //     cout << endl;
+    // }
 }
 
 void SynParser::loadGrammar()
@@ -221,6 +230,20 @@ void SynParser::getFOLLOW()
 
 void SynParser::genParseTable()
 {
-
+    for(auto it=FIRST.begin(); it!=FIRST.end(); ++it){
+        for(ProUnit fst: it->second){
+            if(fst.word!="empty"){
+                if(table[it->first].count(fst.word)>0)
+                    throw runtime_error("预测分析表产生式冲突！");
+                table[it->first][fst.word] = fst.from;
+            }else{//有空符号，则操作follow集
+                for(ProUnit flw:FOLLOW[it->first]){
+                    if(table[it->first].count(fst.word)>0)
+                        throw runtime_error("预测分析表产生式冲突！");
+                    table[it->first][flw.word] = fst.from;
+                }
+            }
+        }
+    }
 }
 #endif
