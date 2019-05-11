@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <fstream>
+#include <stack>
 #include "LexParser.hpp"
 using namespace std;
 
@@ -59,6 +60,7 @@ private:
     map<string, vector<vector<ProUnit>>> m_grammar;
     map<string, set<ProUnit>> FIRST, FOLLOW;
     map<string, map<string, int>> table; //非终结符-终结符-对应非终结符在grammar中的产生式下标
+    stack<ProUnit> S;
 
 public:
     SynParser(LexParser &lex_); //读取产生式
@@ -68,6 +70,7 @@ private:
     void getFIRST();
     void getFOLLOW();
     void genParseTable(); //生成预测分析表
+    void parse();
 };
 
 SynParser::SynParser(LexParser &lex_) : lex(lex_)
@@ -243,6 +246,21 @@ void SynParser::genParseTable()
                     table[it->first][flw.word] = fst.from;
                 }
             }
+        }
+    }
+}
+
+void SynParser::parse(){
+    root->word="program";
+    S.push(ProUnit{"$"});
+    S.push(ProUnit{"program"});
+    ProUnit u = S.top();
+    while(u.word != "$"){
+        Token t = lex.nextToken();
+        if(u.isTerminal()){
+            if(t.type==INT && u.word=="NUM")
+                
+            // if(u.word==lex.nextToken())
         }
     }
 }
