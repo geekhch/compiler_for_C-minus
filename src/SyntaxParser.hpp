@@ -8,25 +8,28 @@
 #include "LexParser.hpp"
 using namespace std;
 
-struct SynNode//语法树结点
+struct SynNode //语法树结点
 {
-    string word; //结点内容
-    int type;
-    vector<SynNode*> children; //子节点(为空时表示根节点，即终结符)
+    string word;                //结点内容
+    int type=-1;                   //用于输出语法树时标注终结符词素类型（id key op...）
+    vector<SynNode *> children; //子节点(为空时表示根节点，即终结符)
     // SynNode(string s):word(s){}
 };
 
-class SynParser{
+class SynParser
+{
 public:
-    SynParser(LexParser &lex_):lex(lex_){
+    SynParser(LexParser &lex_) : lex(lex_)
+    {
         root = new SynNode{"program"};
         curNode = root;
         declaration_list(root);
-        exception_line=0;
+        exception_line = 0;
         step = 1;
     }
-    ~SynParser(){
-        printTree(root,0);
+    ~SynParser()
+    {
+        printTree(root, 0);
     }
 
 private:
@@ -73,45 +76,62 @@ private:
 
 #endif
 
-void SynParser::declaration_list(SynNode *parent){
+void SynParser::declaration_list(SynNode *parent)
+{
     SynNode *cur = new SynNode{"declaration_list"};
-    try{
+    try
+    {
         declaration(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
-        try{
+        try
+        {
             declaration(cur);
-            cout << "=====end========"<<endl;
-        }catch(runtime_error e){
-            if(lex.isEnd()){
+            cout << "=====end========" << endl;
+        }
+        catch (runtime_error e)
+        {
+            if (lex.isEnd())
+            {
                 //没有更多申明
                 break;
-            }else{
+            }
+            else
+            {
                 throw e;
             }
         }
     }
     parent->children.push_back(cur);
-    printTree(root,0);
 }
 
-void SynParser::declaration(SynNode *parent){
+void SynParser::declaration(SynNode *parent)
+{
     uint32_t mk = lex.getMarker();
     SynNode *cur = new SynNode{"declaration"};
-    try{
+    try
+    {
         var_declaration(cur);
-    }catch(runtime_error e1){
+    }
+    catch (runtime_error e1)
+    {
         lex.toMarker(mk);
-        try{
+        try
+        {
             fun_declaration(cur);
-        }catch(runtime_error e2){
+        }
+        catch (runtime_error e2)
+        {
             delete cur;
-            cout <<e1.what() <<" or "<<e2.what()<<endl;
+            cout << e1.what() << " or " << e2.what() << endl;
             throw runtime_error("illegel declaration");
             // throw e;
         }
@@ -119,24 +139,31 @@ void SynParser::declaration(SynNode *parent){
     //找到申明则将当前结点插入
     parent->children.push_back(cur);
 }
-void SynParser::var_declaration(SynNode *parent){
+void SynParser::var_declaration(SynNode *parent)
+{
     SynNode *cur = new SynNode{"var_declaration"};
-    try{
+    try
+    {
         type_specifier(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    if(!match("ID", cur)){
+    if (!match("ID", cur))
+    {
         freeTree(cur);
         throw runtime_error("expected an ID");
     }
 
     uint32_t mk = lex.getMarker();
-    if(!match(";", cur)){
+    if (!match(";", cur))
+    {
         lex.toMarker(mk);
-        if(!(match("[", cur) && match("NUM", cur) && match("]", cur))){
+        if (!(match("[", cur) && match("NUM", cur) && match("]", cur)))
+        {
             //匹配失败回退
             lex.toMarker(mk);
             freeTree(cur);
@@ -146,13 +173,16 @@ void SynParser::var_declaration(SynNode *parent){
     parent->children.push_back(cur);
 }
 
-void SynParser::type_specifier(SynNode *parent){
+void SynParser::type_specifier(SynNode *parent)
+{
     SynNode *cur = new SynNode{"type_specifier"};
     uint32_t mk = lex.getMarker();
-    if(!match("int", cur)){
+    if (!match("int", cur))
+    {
         lex.toMarker(mk);
-        if(!match("void", cur)){//匹配失败
-            freeTree(cur);    
+        if (!match("void", cur))
+        { //匹配失败
+            freeTree(cur);
             throw runtime_error("expected type_specifier: int or void");
         }
     }
@@ -160,75 +190,103 @@ void SynParser::type_specifier(SynNode *parent){
     parent->children.push_back(cur);
 }
 
-void SynParser::fun_declaration(SynNode *parent){
+void SynParser::fun_declaration(SynNode *parent)
+{
     SynNode *cur = new SynNode{"fun_declaration"};
-    try{
+    try
+    {
         type_specifier(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!(match("ID", cur) && match("(",cur))){
+    if (!(match("ID", cur) && match("(", cur)))
+    {
         freeTree(cur);
         throw runtime_error("expected an ID");
     }
 
-    try{
+    try
+    {
         params(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    if(!match(")",cur)){
+    if (!match(")", cur))
+    {
         freeTree(cur);
         throw runtime_error("expected a ')'");
     }
-    try{
+    try
+    {
         compound_stmt(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
     parent->children.push_back(cur);
 }
 
-void SynParser::params(SynNode *parent){
+void SynParser::params(SynNode *parent)
+{
     SynNode *cur = new SynNode{"params"};
     uint32_t mk = lex.getMarker();
-    if(match("void", cur)){
+    if (match("void", cur))
+    {
         parent->children.push_back(cur);
         return;
-    }else{
+    }
+    else
+    {
         lex.toMarker(mk);
     }
-    try{
+    try
+    {
         param_list(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
     parent->children.push_back(cur);
 }
 
-void SynParser::param_list(SynNode *parent){
+void SynParser::param_list(SynNode *parent)
+{
     SynNode *cur = new SynNode{"param_list"};
-    try{
+    try
+    {
         param(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
-        if(!match(",", cur)){
+        if (!match(",", cur))
+        {
             lex.toMarker(mk);
             break;
         }
-        try{
+        try
+        {
             param(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
             cur->children.pop_back();
             break;
@@ -237,15 +295,20 @@ void SynParser::param_list(SynNode *parent){
     parent->children.push_back(cur);
 }
 
-void SynParser::param(SynNode *parent){
+void SynParser::param(SynNode *parent)
+{
     SynNode *cur = new SynNode{"param"};
-    try{
+    try
+    {
         type_specifier(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!match("ID", cur)){
+    if (!match("ID", cur))
+    {
         freeTree(cur);
         throw runtime_error("expected an ID in param");
     }
@@ -253,9 +316,11 @@ void SynParser::param(SynNode *parent){
     //尝试匹配下标符
     uint32_t mk = lex.getMarker();
     int num_child = cur->children.size();
-    if(!(match("[",cur) && match("]", cur))){
+    if (!(match("[", cur) && match("]", cur)))
+    {
         lex.toMarker(mk);
-        while(num_child<(cur->children.size())){
+        while (num_child < (cur->children.size()))
+        {
             cur->children.pop_back();
         }
     }
@@ -263,76 +328,108 @@ void SynParser::param(SynNode *parent){
     parent->children.push_back(cur);
 }
 
-void SynParser::compound_stmt(SynNode *parent){
+void SynParser::compound_stmt(SynNode *parent)
+{
     SynNode *cur = new SynNode{"compound_stmt"};
-    if(!match("{", cur)){
+    if (!match("{", cur))
+    {
         freeTree(cur);
         throw runtime_error("expected a '{'");
     }
 
-    try{
+    try
+    {
         local_declarations(cur);
         statement_list(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!match("}", cur)){
+    if (!match("}", cur))
+    {
         freeTree(cur);
         throw runtime_error("expected a '}'");
     }
     parent->children.push_back(cur);
 }
-void SynParser::local_declarations(SynNode *parent){
+void SynParser::local_declarations(SynNode *parent)
+{
     SynNode *cur = new SynNode{"local_declarations"};
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
-        try{
+        try
+        {
             var_declaration(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
             break;
         }
     }
-    if(!cur->children.empty())
+    if (!cur->children.empty())
         parent->children.push_back(cur);
 }
-void SynParser::statement_list(SynNode *parent){
+void SynParser::statement_list(SynNode *parent)
+{
     SynNode *cur = new SynNode{"statement_list"};
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
-        try{
+        try
+        {
             statement(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
             break;
         }
     }
-    if(!cur->children.empty())
+    if (!cur->children.empty())
         parent->children.push_back(cur);
 }
-void SynParser::statement(SynNode *parent){
+void SynParser::statement(SynNode *parent)
+{
     SynNode *cur = new SynNode{"statement"};
     uint32_t mk = lex.getMarker();
-    try{
+    try
+    {
         expression_stmt(cur);
-    }catch(runtime_error e1){
+    }
+    catch (runtime_error e1)
+    {
         lex.toMarker(mk);
-        try{
+        try
+        {
             compound_stmt(cur);
-        }catch(runtime_error e2){
+        }
+        catch (runtime_error e2)
+        {
             lex.toMarker(mk);
-            try{
+            try
+            {
                 selection_stmt(cur);
-            }catch(runtime_error e3){
+            }
+            catch (runtime_error e3)
+            {
                 lex.toMarker(mk);
-                try{
+                try
+                {
                     iteration_stmt(cur);
-                }catch(runtime_error e4){
+                }
+                catch (runtime_error e4)
+                {
                     lex.toMarker(mk);
-                    try{
+                    try
+                    {
                         return_stmt(cur);
-                    }catch(runtime_error e5){
+                    }
+                    catch (runtime_error e5)
+                    {
                         lex.toMarker(mk);
                         throw runtime_error("illegel statment");
                     }
@@ -343,100 +440,137 @@ void SynParser::statement(SynNode *parent){
 
     parent->children.push_back(cur);
 }
-void SynParser::expression_stmt(SynNode *parent){
+void SynParser::expression_stmt(SynNode *parent)
+{
     SynNode *cur = new SynNode{"expression_stmt"};
     uint32_t mk = lex.getMarker();
-    
-    if(!match(";",cur)){
+
+    if (!match(";", cur))
+    {
         lex.toMarker(mk);
-        try{
+        try
+        {
             expression(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             freeTree(cur);
             throw e;
         }
-        if(!match(";",cur)){
+        if (!match(";", cur))
+        {
             freeTree(cur);
             throw runtime_error("expected a ';'");
         }
     }
     parent->children.push_back(cur);
 }
-void SynParser::selection_stmt(SynNode *parent){
+void SynParser::selection_stmt(SynNode *parent)
+{
     SynNode *cur = new SynNode{"selection_stmt"};
-    if(!(match("if",cur) && match("(", cur))){
+    if (!(match("if", cur) && match("(", cur)))
+    {
         freeTree(cur);
         throw runtime_error("illegel selection_stmt, expected 'if('");
     }
-    try{
+    try
+    {
         expression(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!match(")", cur)){
+    if (!match(")", cur))
+    {
         freeTree(cur);
         throw runtime_error("illegel selection_stmt, expected ')'");
     }
-    try{
+    try
+    {
         statement(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
     uint32_t mk = lex.getMarker();
-    if(match("else", cur)){
-        try{
+    if (match("else", cur))
+    {
+        try
+        {
             statement(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             freeTree(cur);
             throw e;
         }
-    }else{
+    }
+    else
+    {
         lex.toMarker(mk);
     }
     parent->children.push_back(cur);
 }
-void SynParser::iteration_stmt(SynNode *parent){
+void SynParser::iteration_stmt(SynNode *parent)
+{
     SynNode *cur = new SynNode{"iteration_stmt"};
-    if(!(match("while",cur) && match("(", cur))){
+    if (!(match("while", cur) && match("(", cur)))
+    {
         freeTree(cur);
         throw runtime_error("illegel iteration_stmt, expected 'while('");
     }
-    try{
+    try
+    {
         expression(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!match(")", cur)){
+    if (!match(")", cur))
+    {
         freeTree(cur);
         throw runtime_error("illegel selection_stmt, expected ')'");
     }
-    try{
+    try
+    {
         statement(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
     parent->children.push_back(cur);
 }
-void SynParser::return_stmt(SynNode *parent){
+void SynParser::return_stmt(SynNode *parent)
+{
     SynNode *cur = new SynNode{"return_stmt"};
-    if(!match("return",cur)){
+    if (!match("return", cur))
+    {
         freeTree(cur);
         throw runtime_error("illegel return_stmt, expected 'return'");
     }
     uint32_t mk = lex.getMarker();
-    if(!match(";",cur)){
+    if (!match(";", cur))
+    {
         lex.toMarker(mk);
-        try{
+        try
+        {
             expression(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             freeTree(cur);
             throw e;
         }
-        if(!match(";",cur)){
+        if (!match(";", cur))
+        {
             freeTree(cur);
             throw runtime_error("expected ';'");
         }
@@ -444,65 +578,91 @@ void SynParser::return_stmt(SynNode *parent){
 
     parent->children.push_back(cur);
 }
-void SynParser::expression(SynNode *parent){
+void SynParser::expression(SynNode *parent)
+{
     SynNode *cur = new SynNode{"expression"};
     uint32_t mk = lex.getMarker();
-    try{
-        try{
+    try
+    {
+        try
+        {
             var(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             freeTree(cur);
             throw e;
         }
-        if(!match("=",cur)){
+        if (!match("=", cur))
+        {
             freeTree(cur);
             throw runtime_error("expected '='");
         }
-        try{
+        try
+        {
             expression(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             freeTree(cur);
             throw e;
         }
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         lex.toMarker(mk);
         simple_expression(cur);
     }
     parent->children.push_back(cur);
 }
-void SynParser::var(SynNode *parent){
+void SynParser::var(SynNode *parent)
+{
     SynNode *cur = new SynNode{"var"};
-    if(!match("ID",cur)){
+    if (!match("ID", cur))
+    {
         freeTree(cur);
         throw runtime_error("illegel return_stmt, expected 'return'");
     }
 
     uint32_t mk = lex.getMarker();
-    if(match("[",cur)){
-        try{
+    if (match("[", cur))
+    {
+        try
+        {
             expression(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
-            while(cur->children.size()>1){
+            while (cur->children.size() > 1)
+            {
                 cur->children.pop_back();
             }
         }
-        if(!match("]",cur)){
+        if (!match("]", cur))
+        {
             lex.toMarker(mk);
-            while(cur->children.size()>1){
+            while (cur->children.size() > 1)
+            {
                 cur->children.pop_back();
             }
         }
-    }else{
+    }
+    else
+    {
         lex.toMarker(mk);
     }
     parent->children.push_back(cur);
 }
-void SynParser::simple_expression(SynNode *parent){
+void SynParser::simple_expression(SynNode *parent)
+{
     SynNode *cur = new SynNode{"simple_expression"};
-    try{
+    try
+    {
         additive_expression(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
@@ -510,61 +670,79 @@ void SynParser::simple_expression(SynNode *parent){
     //选择条件，尝试匹配，失败则回退结点以及token列表
     uint32_t mk = lex.getMarker();
     int num_child = cur->children.size();
-    try{
+    try
+    {
         relop(cur);
         additive_expression(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         lex.toMarker(mk);
-        while(cur->children.size()>num_child)
+        while (cur->children.size() > num_child)
             cur->children.pop_back();
     }
 
     parent->children.push_back(cur);
 }
-void SynParser::relop(SynNode *parent){
+void SynParser::relop(SynNode *parent)
+{
     SynNode *cur = new SynNode{"relop"};
     uint32_t mk = lex.getMarker();
 
-    if(!match("<=",cur)){
+    if (!match("<=", cur))
+    {
         lex.toMarker(mk);
-        if(!match(">=",cur)){
+        if (!match(">=", cur))
+        {
             lex.toMarker(mk);
-            if(!match("==",cur)){
+            if (!match("==", cur))
+            {
                 lex.toMarker(mk);
-                if(!match("!=",cur)){
+                if (!match("!=", cur))
+                {
                     lex.toMarker(mk);
-                    if(!match(">",cur)){
+                    if (!match(">", cur))
+                    {
                         lex.toMarker(mk);
-                        if(!match("<",cur)){
+                        if (!match("<", cur))
+                        {
                             throw runtime_error("expected a relop");
                         }
                     }
-                }   
+                }
             }
         }
     }
 
     parent->children.push_back(cur);
 }
-void SynParser::additive_expression(SynNode *parent){
+void SynParser::additive_expression(SynNode *parent)
+{
     SynNode *cur = new SynNode{"additive_expression"};
     uint32_t mk = lex.getMarker();
-    try{
+    try
+    {
         term(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
         int num_child = cur->children.size();
-        try{
+        try
+        {
             addop(cur);
             term(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
-            while (num_child<cur->children.size())
+            while (num_child < cur->children.size())
             {
                 cur->children.pop_back();
             }
@@ -573,35 +751,46 @@ void SynParser::additive_expression(SynNode *parent){
     }
     parent->children.push_back(cur);
 }
-void SynParser::addop(SynNode *parent){
+void SynParser::addop(SynNode *parent)
+{
     SynNode *cur = new SynNode{"addop"};
     uint32_t mk = lex.getMarker();
-    if(!match("+",cur)){
+    if (!match("+", cur))
+    {
         lex.toMarker(mk);
-        if(!match("-",cur)){
+        if (!match("-", cur))
+        {
             throw runtime_error("expected a '+' or '-'");
         }
     }
     parent->children.push_back(cur);
 }
-void SynParser::term(SynNode *parent){
+void SynParser::term(SynNode *parent)
+{
     SynNode *cur = new SynNode{"term"};
-    try{
+    try
+    {
         factor(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
         int num_child = cur->children.size();
-        try{
+        try
+        {
             mulop(cur);
             factor(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
-            while (num_child<cur->children.size())
+            while (num_child < cur->children.size())
             {
                 cur->children.pop_back();
             }
@@ -610,42 +799,60 @@ void SynParser::term(SynNode *parent){
     }
     parent->children.push_back(cur);
 }
-void SynParser::mulop(SynNode *parent){
+void SynParser::mulop(SynNode *parent)
+{
     SynNode *cur = new SynNode{"mulop"};
     uint32_t mk = lex.getMarker();
-    if(!match("*",cur)){
+    if (!match("*", cur))
+    {
         lex.toMarker(mk);
-        if(!match("/",cur)){
+        if (!match("/", cur))
+        {
             freeTree(cur);
             throw runtime_error("expected a '*' or '/'");
         }
     }
     parent->children.push_back(cur);
 }
-void SynParser::factor(SynNode *parent){
+void SynParser::factor(SynNode *parent)
+{
     SynNode *cur = new SynNode{"factor"};
     uint32_t mk = lex.getMarker();
-    if(!match("NUM",cur)){
+    if (!match("NUM", cur))
+    {
         lex.toMarker(mk);
-        try{
+        try
+        {
             call(cur);
-        }catch(runtime_error e1){
+        }
+        catch (runtime_error e1)
+        {
             lex.toMarker(mk);
-            try{
+            try
+            {
                 var(cur);
-            }catch(runtime_error e2){
+            }
+            catch (runtime_error e2)
+            {
                 lex.toMarker(mk);
-                if(!match("(",cur)){
+                if (!match("(", cur))
+                {
                     freeTree(cur);
                     throw runtime_error("illegel language, expected '('");
-                }else{
-                    try{
+                }
+                else
+                {
+                    try
+                    {
                         expression(cur);
-                    }catch(runtime_error e3){
+                    }
+                    catch (runtime_error e3)
+                    {
                         freeTree(cur);
                         throw e3;
                     }
-                    if(!match("(",cur)){
+                    if (!match("(", cur))
+                    {
                         freeTree(cur);
                         throw runtime_error("illegel language, expected ')'");
                     }
@@ -655,54 +862,73 @@ void SynParser::factor(SynNode *parent){
     }
     parent->children.push_back(cur);
 }
-void SynParser::call(SynNode *parent){
+void SynParser::call(SynNode *parent)
+{
     SynNode *cur = new SynNode{"call"};
-    if(!(match("ID",cur) && match("(", cur))){
+    if (!(match("ID", cur) && match("(", cur)))
+    {
         freeTree(cur);
         throw runtime_error("illegel call");
     }
-    try{
+    try
+    {
         args(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
-    if(!match(")",cur)){
+    if (!match(")", cur))
+    {
         freeTree(cur);
         throw runtime_error("illegel call, expected ')'");
     }
 
     parent->children.push_back(cur);
 }
-void SynParser::args(SynNode *parent){
+void SynParser::args(SynNode *parent)
+{
     SynNode *cur = new SynNode{"args"};
     uint32_t mk = lex.getMarker();
-    try{
+    try
+    {
         arg_list(cur);
         parent->children.push_back(cur);
-    }catch(runtime_error e){//有empty,不抛出新异常
+    }
+    catch (runtime_error e)
+    { //有empty,不抛出新异常
         lex.toMarker(mk);
         freeTree(cur);
     }
 }
-void SynParser::arg_list(SynNode *parent){
+void SynParser::arg_list(SynNode *parent)
+{
     SynNode *cur = new SynNode{"arg_list"};
-    try{
+    try
+    {
         expression(cur);
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         freeTree(cur);
         throw e;
     }
 
-    while(true){
+    while (true)
+    {
         uint32_t mk = lex.getMarker();
-        if(!match(",",cur)){
+        if (!match(",", cur))
+        {
             lex.toMarker(mk);
             break;
         }
-        try{
+        try
+        {
             expression(cur);
-        }catch(runtime_error e){
+        }
+        catch (runtime_error e)
+        {
             lex.toMarker(mk);
             cur->children.pop_back();
             break;
@@ -711,52 +937,69 @@ void SynParser::arg_list(SynNode *parent){
     parent->children.push_back(cur);
 }
 
-void SynParser::freeTree(SynNode *root){
-    if(root->children.empty())
+void SynParser::freeTree(SynNode *root)
+{
+    if (root->children.empty())
         delete root;
-    else{
-        for(auto node: root->children){
+    else
+    {
+        for (auto node : root->children)
+        {
             freeTree(node);
         }
     }
 }
 
-bool SynParser::match(string terminal, SynNode *parent){
-    try{
+bool SynParser::match(string terminal, SynNode *parent)
+{
+    try
+    {
         Token tk = lex.nextToken();
         // cout << "step"<<step++<<": "<< tk.strfToken()<<endl;
-        if(terminal=="ID" && tk.type==ID){
-            parent->children.push_back(new SynNode{tk.s_value,ID});
+        if (terminal == "ID" && tk.type == ID)
+        {
+            parent->children.push_back(new SynNode{tk.s_value, ID});
             return true;
-        }else if(terminal=="NUM" && tk.type==INT){
+        }
+        else if (terminal == "NUM" && tk.type == INT)
+        {
             parent->children.push_back(new SynNode{to_string(tk.i_value), INT});
             return true;
-        }else if(terminal==tk.s_value){
-            parent->children.push_back(new SynNode{tk.s_value,OP});
+        }
+        else if (terminal == tk.s_value)
+        {
+            parent->children.push_back(new SynNode{tk.s_value, tk.type});
             return true;
         }
         exception_line = tk.line;
         return false;
-    }catch(runtime_error e){
+    }
+    catch (runtime_error e)
+    {
         //没有新的终结符
         throw e;
     }
-
 }
 
-void SynParser::freeChildren(SynNode *parent){
-    while(!parent->children.empty()){
+void SynParser::freeChildren(SynNode *parent)
+{
+    while (!parent->children.empty())
+    {
         auto cld = parent->children.back();
         parent->children.pop_back();
         freeTree(cld);
     }
 }
 
-void SynParser::printTree(SynNode *root, int indent=0){
-    for(int i=0;i<indent;++i)
+void SynParser::printTree(SynNode *root, int indent = 0)
+{
+    for (int i = 0; i < indent; ++i)
         cout << ' ';
-    cout<< TYPE_NAME[root->type]<<": " <<root->word<<endl;
-    for(auto cld:root->children){
-        printTree(cld, indent+2);
+    if(root->type!=-1)
+        cout << TYPE_NAME[root->type] << ": ";
+    cout << root->word << endl;
+    for (auto cld : root->children)
+    {
+        printTree(cld, indent + 2);
     }
 }

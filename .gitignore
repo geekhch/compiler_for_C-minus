@@ -2,3 +2,4 @@
 .vscode
 **/*.exe
 src/test.cpp
+**/*.gch
