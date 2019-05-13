@@ -60,7 +60,6 @@ private:
     map<string, vector<vector<ProUnit>>> m_grammar;
     map<string, set<ProUnit>> FIRST, FOLLOW;
     map<string, map<string, int>> table; //非终结符-终结符-对应非终结符在grammar中的产生式下标
-    stack<ProUnit> S;
 
 public:
     SynParser(LexParser &lex_); //读取产生式
@@ -251,16 +250,50 @@ void SynParser::genParseTable()
 }
 
 void SynParser::parse(){
-    root->word="program";
+    stack<ProUnit> S; //符号栈
+    root = new SynNode{"program"};
     S.push(ProUnit{"$"});
     S.push(ProUnit{"program"});
-    ProUnit u = S.top();
+    ProUnit u = S.top();  //栈顶符号
+    stack<SynNode*> tree;  //保存语法树当前父亲节点
+
+    // tree.push(root);
     while(u.word != "$"){
+        uint32_t mk = lex.getMarker();
         Token t = lex.nextToken();
-        if(u.isTerminal()){
-            if(t.type==INT && u.word=="NUM")
-                
-            // if(u.word==lex.nextToken())
+        if(u.isTerminal()){ //栈顶终结符匹配
+            if(t.type==INT && u.word=="NUM"){
+                tree.top()->children.push_back(new SynNode{to_string(t.i_value), INT});
+            }else if(t.s_value==u.word || t.type==ID && u.word=="ID"){
+                tree.top()->children.push_back(new SynNode{u.word, t.type});
+            }else{
+                cout << "match failed with token:" <<t.s_value<<", expected:"<<u.word<<endl; 
+                throw runtime_error("error!");
+            }
+        }else{//栈顶非终结符
+            S.pop();
+            if(t.type==ID || t.type==INT){
+                if (table[u.word].count("NUM")==0 && table[u.word].count("ID")==0)
+                    throw runtime_error("product doesn't exists!");
+                else{
+                    int idx = table[u.word][TYPE_NAME[t.type]];
+                    for(ProUnit tp:m_grammar[u.word][idx]){
+                        S.push(tp);
+                        
+                    }
+                }
+            }else{
+                if (table[u.word].count(t.s_value) == 0)
+                    throw runtime_error("product doesn't exists!");
+                else{
+                    int idx = table[u.word][t.s_value];
+                    for (ProUnit tp : m_grammar[u.word][idx])
+                    {
+                        S.push(tp);
+                    }
+                }
+            }
+            lex.toMarker(mk);
         }
     }
 }

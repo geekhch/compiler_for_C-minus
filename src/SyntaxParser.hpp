@@ -11,7 +11,7 @@ using namespace std;
 struct SynNode//语法树结点
 {
     string word; //结点内容
-    int type;
+    int type; //用于输出语法树时标注终结符词素类型（id key op...）
     vector<SynNode*> children; //子节点(为空时表示根节点，即终结符)
     // SynNode(string s):word(s){}
 };
