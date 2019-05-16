@@ -101,3 +101,14 @@ args  → empty
 arg-list  →  arg-list, expression
 arg-list  → expression
 ```
+
+
+// expression → var=expression|simple-expression
+
+// simple-expression → additive-expression relop additive-expression | additive-expression
+// additive-expression → additive-expression addop term|term
+// term → term mulop factor|factor
+
+// expression → ID=expression|ID[expression]=expression|simple-expression
+
+// factor (expression)|NUM|ID(args)|ID|ID[expression]

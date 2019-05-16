@@ -31,19 +31,19 @@ statement           iteration-stmt
 statement           return-stmt
 expression-stmt     expression ;
 expression-stmt     ;
-selection-stmt      if ( expression )  statement help_lf3
+selection-stmt      if ( simple-expression )  statement help_lf3
 help_lf3            empty
 help_lf3            else statement
 iteration-stmt      while ( expression )  statement
 return-stmt         return help_lf4
 help_lf4            ;
 help_lf4            expression ;
-expression          var = expression
 expression          simple-expression
+expression          var = expression
 var                 ID help_lf5
 help_lf5            empty
 help_lf5            [ expression ]
-simple-expression    additive-expression help_lf6
+simple-expression   additive-expression help_lf6
 help_lf6            empty
 help_lf6            relop additive-expression
 relop               <=
