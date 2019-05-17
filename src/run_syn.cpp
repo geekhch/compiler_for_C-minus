@@ -1,5 +1,5 @@
 #include "lexical/LexParser.hpp"
-#include "syntax/SyntaxParserRec.hpp"
+#include "syntax/SynParserRec.hpp"
 // #include "syntax/SynParserLL1.hpp"
 
 void stars();
