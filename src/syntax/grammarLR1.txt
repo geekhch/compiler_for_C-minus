@@ -1,6 +1,7 @@
 program                 declaration-list
-declaration-list        declaration-list declaration
-declaration-list        declaration
+declaration-list    declaration help1
+help1               declaration help1
+help1               empty
 declaration             var-declaration
 declaration             fun-declaration
 var-declaration         type-specifier ID;
@@ -11,8 +12,9 @@ fun-declaration         type-specifier ID(params)
 fun-declaration         compound-stmt
 params                  param-list
 params                  void
-param-list              param-list,param
-param-list              param
+param-list          param help2
+help2               , param help2
+help2               empty
 param                   type-specifier ID
 param                   type-specifier ID[]
 compound-stmt           {local-declarations statement-list}
@@ -44,12 +46,14 @@ relop                   >
 relop                   >=
 relop                   ==
 relop                   !=
-additive-expression     additive-expression addop term
-additive-expression     term
+additive-expression term help3
+help3               addop term help3
+help3               empty
 addop                   +
 addop                   -
-term                    term mulop factor
-term                    factor
+term                factor help4
+help4               mulop factor help4
+help4               empty
 mulop                   *
 mulop                   /
 factor                  (expression)
@@ -59,5 +63,6 @@ factor                  NUM
 call                    ID(args)
 args                    arg-list
 args                    empty
-arg-list                arg-list, expression
-arg-list                expression
+arg-list            expression help5
+help5               , expression help5
+help5               empty

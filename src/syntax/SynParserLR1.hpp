@@ -49,13 +49,14 @@ class SynParser
 private:
     LexParser &lex;
     vector<vector<ProUnit>> m_grammar;
-    map<string, set<ProUnit>> FOLLOW;
+    map<string, set<ProUnit>> FIRST, FOLLOW;
 
 public:
     SynParser(LexParser &lex_); //读取产生式
 private:
     set<ProUnit> getFIRSThelper(vector<ProUnit>::iterator begin,vector<ProUnit>::iterator end, int from);
     void loadGrammar();
+    void getFIRST();
     void getFOLLOW();
 };
 
@@ -63,6 +64,7 @@ SynParser::SynParser(LexParser &lex_) : lex(lex_)
 {
     cout << "parsing..." << endl;
     loadGrammar();
+    getFIRST();
     getFOLLOW();
 
     // //输出first follow语法结果
@@ -100,6 +102,23 @@ void SynParser::loadGrammar()
         { //一行结束，将当前符号加入对应非终结符的产生式
             m_grammar.push_back(curPro);
             curPro.clear();
+        }
+    }
+}
+
+void SynParser::getFIRST()
+{
+    //规则1，每条产生式首个终结符直接加入first
+    bool more = true;
+    while (more)
+    {
+        more = false;
+        for (int i=0; i<m_grammar.size(); ++i)
+        {   
+            auto has_new = FIRST[m_grammar[i][0].word].size(); //初始大小
+            auto ret = getFIRSThelper(m_grammar[i].begin()+1, m_grammar[i].end(), i);
+            FIRST[m_grammar[i][0].word].insert(ret.begin(), ret.end());
+            more |= (has_new!=FIRST[m_grammar[i][0].word].size());
         }
     }
 }
