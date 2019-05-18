@@ -15,9 +15,6 @@ const string KEYW[] = {"else", "if", "int", "return", "void", "while"};
 const char OPS[] = {'+', '-', '*', '/', '<', '=', '>', '!', ';', ',', '(', ')', '[', ']', '{', '}'};
 const string TYPE_NAME[] = {"KEY", "INT", "ID", "OP", "PUNCT"};
 
-// extern const string KEN[];
-// extern const char OPS[];
-// extern const string TYPE_NAME[];
 
 enum TYPE{KEY, INT, ID, OP, PUNCT};
 
@@ -95,10 +92,10 @@ string Token::strfToken()
     static char tokenString[100];
     if(type == INT)
     {
-        sprintf(tokenString,"< %1d   %d   %d>",type,i_value,line);
+        sprintf(tokenString,"< %s   %d   %d>",TYPE_NAME[type].c_str(),i_value,line);
     }else
     {
-        sprintf(tokenString,"< %1d   %s   %d>",type,s_value.c_str(),line);
+        sprintf(tokenString,"< %s   %s   %d>",TYPE_NAME[type].c_str(),s_value.c_str(),line);
     }
     return string(tokenString);
 }

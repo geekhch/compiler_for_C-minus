@@ -1,0 +1,68 @@
+program                 declaration-list
+declaration-list    declaration help1
+help1               declaration help1
+help1               empty
+declaration             var-declaration
+declaration             fun-declaration
+var-declaration         type-specifier ID;
+var-declaration         type-specifier ID[NUM];
+type-specifier          int
+type-specifier          void
+fun-declaration         type-specifier ID(params)
+fun-declaration         compound-stmt
+params                  param-list
+params                  void
+param-list          param help2
+help2               , param help2
+help2               empty
+param                   type-specifier ID
+param                   type-specifier ID[]
+compound-stmt           {local-declarations statement-list}
+local-declarations      local-declarations var-declaration
+local-declarations      empty
+statement-list          statement-list statement
+statement-list          empty
+statement               expression-stmt
+statement               compound-stmt
+statement               selection-stmt
+statement               iteration-stmt
+statement               return-stmt
+expression-stmt         expression;
+expression-stmt         ;
+selection-stmt          if(expression) statement 
+selection-stmt          if(expression) statement else statement
+iteration-stmt          while(expression) statement
+return-stmt             return;
+return-stmt             return expression;
+expression              var=expression
+expression              simple-expression
+var                     ID
+var                     ID[expression]
+simple-expression       additive-expression relop additive-expression 
+simple-expression       additive-expression
+relop                   <=
+relop                   <
+relop                   >
+relop                   >=
+relop                   ==
+relop                   !=
+additive-expression term help3
+help3               addop term help3
+help3               empty
+addop                   +
+addop                   -
+term                factor help4
+help4               mulop factor help4
+help4               empty
+mulop                   *
+mulop                   /
+factor                  (expression)
+factor                  var
+factor                  call
+factor                  NUM
+call                    ID(args)
+args                    arg-list
+args                    empty
+arg-list            expression help5
+help5               , expression help5
+help5               empty
