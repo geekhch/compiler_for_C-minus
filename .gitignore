@@ -1,5 +1,6 @@
 **/.vscode
 .vscode
+**/*.out
 **/*.exe
 src/test.cpp
 **/*.gch
