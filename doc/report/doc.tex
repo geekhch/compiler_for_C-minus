@@ -1,0 +1,39 @@
+% --shell-escape !Mode:: "TeX:UTF-8 "
+\documentclass{xcumcmart}
+\usepackage{setspace}
+\usepackage{enumerate}
+\usepackage{graphics}
+\usepackage{tabu}
+\usepackage{minted}
+
+
+% \title{text}这里是显示在第三页的文章标题
+\title{编译原理课程报告}
+% \author{何长鸿 2016141482154}
+
+\linespread{1.5} %行距
+\CTEXsetup[format={\Large\bfseries}]{section} %章节标题左对齐
+\setlength{\parskip}{1.4em} %1.4倍段落距离
+
+\begin{document}
+
+\renewcommand\arraystretch{2}
+\maketitle
+
+\section{课程设计目标}
+\par 本课程设计需要我们结合《编译原理》课程理论知识，使用C/C++语言编写构造词法分析器和语法分析器两个模块。
+\subsection{词法分析器}
+\par 本实验的词法分析器核心功能如下：
+\begin{enumerate}[1]
+    \item 读入源程序接口fd
+\end{enumerate}
+
+
+\begin{minted}{c}
+    int main() {
+    printf("hello, world");
+    return 0;
+    }
+\end{minted}
+
+\end{document}
