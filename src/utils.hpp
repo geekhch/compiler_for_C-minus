@@ -15,6 +15,7 @@
 #include "lexical/LexParser.hpp"
 using namespace std;
 
+
 struct SynNode //语法树结点
 {
     string word;                //结点内容
@@ -65,9 +66,14 @@ struct Item{
         return false;
     }
 };
+
+
+/*************   类型定义   ****************/
+typedef set<Item> Closure;
+typedef vector<ProUnit> Production; //产生式
 /****************************************************/
 
-set<ProUnit> getFIRSThelper(map<string, set<ProUnit>> &FIRST, vector<ProUnit>::iterator begin, vector<ProUnit>::iterator end, int from)
+set<ProUnit> getFIRSThelper(map<string, set<ProUnit>> &FIRST, Production::iterator begin, Production::iterator end, int from)
 { //对一条产生式序列求first集
     set<ProUnit> ret;
     for (auto it = begin; it != end; it++)
@@ -94,7 +100,7 @@ set<ProUnit> getFIRSThelper(map<string, set<ProUnit>> &FIRST, vector<ProUnit>::i
     return ret;
 }
 
-map<string, set<ProUnit>> getFIRST(vector<vector<ProUnit>> m_grammar)
+map<string, set<ProUnit>> getFIRST(vector<Production> m_grammar)
 {
     map<string, set<ProUnit>> FIRST;
     //规则1，每条产生式首个终结符直接加入first
@@ -113,7 +119,7 @@ map<string, set<ProUnit>> getFIRST(vector<vector<ProUnit>> m_grammar)
     return FIRST;
 }
 
-map<string, set<ProUnit>> getFOLLOW(vector<vector<ProUnit>> m_grammar, map<string, set<ProUnit>> FIRST)
+map<string, set<ProUnit>> getFOLLOW(vector<Production> m_grammar, map<string, set<ProUnit>> FIRST)
 {
     map<string, set<ProUnit>> FOLLOW;
 
@@ -170,12 +176,12 @@ map<string, set<ProUnit>> getFOLLOW(vector<vector<ProUnit>> m_grammar, map<strin
 }
 
 
-set<Item> closure(vector<vector<ProUnit>> m_grammar,Item item){
-    set<Item> CLOSURE;
+Closure closure(vector<Production> m_grammar,Item item){
+    Closure CLOSURE;
     CLOSURE.insert(item);
     
     while(true){
-        set<Item> tmp; //本次迭代新增的项
+        Closure tmp; //本次迭代新增的项
         for(auto it=CLOSURE.begin(); it!=CLOSURE.end();it++){
             auto pd = m_grammar[it->pd_idx];
 

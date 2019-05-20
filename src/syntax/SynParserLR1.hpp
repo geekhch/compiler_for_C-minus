@@ -6,22 +6,24 @@
 #include "../utils.hpp"
 using namespace std;
 
-extern map<string, set<ProUnit>> getFIRST(vector<vector<ProUnit>>);
-extern map<string, set<ProUnit>> getFOLLOW(vector<vector<ProUnit>>, map<string, set<ProUnit>>);
-extern set<Item> closure(vector<vector<ProUnit>>, Item);
+extern map<string, set<ProUnit>> getFIRST(vector<Production>);
+extern map<string, set<ProUnit>> getFOLLOW(vector<Production>, map<string, set<ProUnit>>);
+extern Closure closure(vector<Production>, Item);
 
 class SynParser
 {
 private:
     LexParser &lex;
-    vector<vector<ProUnit>> m_grammar;
+    vector<Production> m_grammar;
     map<string, set<ProUnit>> FIRST, FOLLOW;
-
-public:
+    vector<Closure> states; //状态机状态
+    map<int, ProUnit> gotos; //状态转换
+public: 
     SynParser(LexParser &lex_); //读取产生式
 private:
     void loadGrammar();
     void debug();
+    void FSM();
 };
 
 SynParser::SynParser(LexParser &lex_) : lex(lex_)
@@ -37,7 +39,7 @@ void SynParser::debug()
 { 
     cout <<"here are "<< m_grammar.size() <<" producitons in grammar"<<endl;
 
-    // set<Item> test= closure(m_grammar,Item{0,0});
+    // Closure test= closure(m_grammar,Item{0,0});
     // for(auto it = test.begin(); it!=test.end();++it){
     //     cout << it->pd_idx << ' '<< it->dot_idx<<endl;
     // }
@@ -76,7 +78,7 @@ void SynParser::loadGrammar()
     
     string word;
 
-    vector<ProUnit> curPro;
+    Production curPro;
     while (f_grm >> word)
     {
         curPro.push_back(ProUnit{word});
@@ -90,4 +92,19 @@ void SynParser::loadGrammar()
     f_grm.close();
 }
 
+void SynParser::FSM(){
+    Closure start = closure(m_grammar,Item{0,0});
+    states.push_back(start);
+    while(true){
+        for(Closure ce:states){
+            for(Item im:ce){
+                if(im.dot_idx < m_grammar[im.pd_idx].size()-1){
+                    //移进GOTO(I,X),I为closure下标
+                    Closure tmp = closure(m_grammar, Item{im.pd_idx, im.dot_idx+1});
+                    
+                }
+            }
+        }
+    }
+}
 #endif
