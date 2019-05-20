@@ -6,21 +6,8 @@
 #include <iterator>
 #include <fstream>
 #include "../lexical/LexParser.hpp"
+#include "../utils.hpp"
 using namespace std;
-
-struct SynNode //语法树结点
-{
-<<<<<<< HEAD:src/SyntaxParser.hpp
-    string word; //结点内容
-    int type; //用于输出语法树时标注终结符词素类型（id key op...）
-    vector<SynNode*> children; //子节点(为空时表示根节点，即终结符)
-=======
-    string word;                //结点内容
-    int type=-1;                   //用于输出语法树时标注终结符词素类型（id key op...）
-    vector<SynNode *> children; //子节点(为空时表示根节点，即终结符)
->>>>>>> 72f7a9e32ac0adead4e8f2004846e888397cd356:src/syntax/SynParserRec.hpp
-    // SynNode(string s):word(s){}
-};
 
 class SynParser
 {
