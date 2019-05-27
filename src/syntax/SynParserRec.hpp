@@ -125,7 +125,7 @@ void SynParser::declaration(SynNode *parent)
         catch (runtime_error e2)
         {
             delete cur;
-            cout << e1.what() << " or " << e2.what() << endl;
+            cout <<"near line "<<exception_line<<": "<< e1.what() << " or " << e2.what() << endl;
             throw runtime_error("illegel declaration");
             // throw e;
         }
@@ -161,7 +161,7 @@ void SynParser::var_declaration(SynNode *parent)
             //匹配失败回退
             lex.toMarker(mk);
             freeTree(cur);
-            throw runtime_error("illegel var-declaration");
+            throw runtime_error("expected declaration format type id[NUM]");
         }
     }
     parent->children.push_back(cur);
@@ -215,6 +215,7 @@ void SynParser::fun_declaration(SynNode *parent)
     if (!match(")", cur))
     {
         freeTree(cur);
+        cout << "expected a ')'" <<endl;
         throw runtime_error("expected a ')'");
     }
     try
