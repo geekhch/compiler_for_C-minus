@@ -10,7 +10,7 @@ using namespace std;
 
 int main()
 {
-    string s("hrllo");
-    cout << to_string(x) << endl;
+    
+    while(true);
     return 0;
 }

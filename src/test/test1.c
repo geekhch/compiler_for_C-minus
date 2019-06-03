@@ -1,18 +1,20 @@
-int gcd(int u, int v)
-{
-    if (v != 0)
-        return u;
-    else
-        return gcd(v, u - u / v * v);
-    /* u-u
-    /v*v == u mod v */
+int x[10];
+int minloc (int a[], int low, int high){
+  int i;
+  int x;
+  int k;
+  k = low;
+  x = a[low];
+  i = low + 1;
+  while(i < high){
+    if(a[i] < x){
+      x = a[i];
+      k = i;
+    }
+    i = i + 1;
+  }
+  return k;
 }
-void main(void)
-{
-    int x;
-    int y;
-    x = input();
-    y = input();
-    output(gcd(x, y));
+void main(void){
+	output(minloc(x, 4, 9));
 }
-
