@@ -1,0 +1,8 @@
+make lex
+make yacc
+make
+
+./parser < test.c > test.asm
+
+nasm -f elf test.asm
+ld -s -o test test.o
