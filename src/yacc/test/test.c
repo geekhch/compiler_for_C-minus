@@ -14,5 +14,5 @@ int main(void)
 	y = input();
 	output(gcd(x, y));
 
-	return 0;
+	return 10;
 }
