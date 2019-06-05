@@ -9,7 +9,7 @@ else
 void main(void)
 { 
 int x;
-int y;
+int y;f
 x = input();
 y = input();
   output(gcd(x,y));
