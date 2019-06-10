@@ -2,15 +2,16 @@ program             declaration-list
 declaration-list    declaration help1
 help1               declaration help1
 help1               empty
-declaration         var-declaration
-declaration         fun-declaration
-var-declaration     type-specifier ID help_lf1
+declaration         type-specifier ID declaration-h
+declaration-h         var-declaration
+declaration-h         fun-declaration
+var-declaration     help_lf1
+var-declaration-h   type-specifier ID var-declaration
 help_lf1            ;
 help_lf1            [ NUM ]  ;
 type-specifier      int
 type-specifier      void
-fun-declaration     type-specifier ID ( params )
-fun-declaration     compound-stmt
+fun-declaration     ( params ) compound-stmt
 params              param-list
 params              void
 param-list          param help2
@@ -20,7 +21,7 @@ param               type-specifier ID help_lf2
 help_lf2            empty
 help_lf2            [   ]
 compound-stmt       { local-declarations statement-list }
-local-declarations  var-declaration local-declarations
+local-declarations  var-declaration-h local-declarations
 local-declarations  empty
 statement-list      statement statement-list
 statement-list      empty

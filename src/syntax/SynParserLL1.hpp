@@ -111,7 +111,7 @@ void SynParser::genParseTable()
 void SynParser::parse(){
     stack<ProUnit> S; //符号栈
     S.push(ProUnit{"$"});
-    S.push(ProUnit{"program"});
+    S.push(ProUnit{"declaration-list"});
     ProUnit u = S.top();  //栈顶符号
     while(u.word != "$"){
         auto mk = lex.getMarker();
@@ -133,6 +133,7 @@ void SynParser::parse(){
                 idx = table[u.word]["ID"];
             else
                 idx = table[u.word][tk.s_value];
+            if(idx==0){cout<<"error:" << tk.strfToken()<<endl; throw runtime_error("error");} 
             vector<ProUnit> pd = m_grammar[idx];
 
             //输出产生式和栈操作
