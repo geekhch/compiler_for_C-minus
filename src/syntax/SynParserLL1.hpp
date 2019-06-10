@@ -50,22 +50,22 @@ void SynParser::debug()
     }
     
     // //输出first follow语法结果
-    cout <<"first:"<<endl;
-    for(auto it=FIRST.begin();it!=FIRST.end();++it){
-        cout <<it->first<<": ";
-        for(auto u:it->second){
-            cout <<u.word<<u.from<<" ";
-        }
-        cout << endl;
-    }
-    cout << endl <<"follow:"<<endl;
-    for(auto it=FOLLOW.begin();it!=FOLLOW.end();++it){
-        cout <<it->first<<": ";
-        for(auto u:it->second){
-            cout <<u.word<<" ";
-        }
-        cout << endl;
-    }
+    // cout <<"first:"<<endl;
+    // for(auto it=FIRST.begin();it!=FIRST.end();++it){
+    //     cout <<it->first<<": ";
+    //     for(auto u:it->second){
+    //         cout <<u.word<<u.from<<" ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << endl <<"follow:"<<endl;
+    // for(auto it=FOLLOW.begin();it!=FOLLOW.end();++it){
+    //     cout <<it->first<<": ";
+    //     for(auto u:it->second){
+    //         cout <<u.word<<" ";
+    //     }
+    //     cout << endl;
+    // }
 }
 void SynParser::loadGrammar()
 { //将文法产生式保存为map-vector数据结构
@@ -92,6 +92,7 @@ void SynParser::loadGrammar()
 void SynParser::genParseTable()
 {
     for(auto it=FIRST.begin(); it!=FIRST.end(); ++it){
+        //搜索FIRST集，填写预测分析表
         for(ProUnit fst: it->second){
             if(fst.word!="empty"){
                 if(table[it->first].count(fst.word)>0)
@@ -136,7 +137,7 @@ void SynParser::parse(){
             if(idx==0){cout<<"error:" << tk.strfToken()<<endl; throw runtime_error("error");} 
             vector<ProUnit> pd = m_grammar[idx];
 
-            //输出产生式和栈操作
+            //输出产生式和栈的维护
             S.pop();
             for(auto it=pd.begin(); it!=pd.end();++it){
                 cout << it->word << ' ';
@@ -150,6 +151,6 @@ void SynParser::parse(){
         }
         u = S.top();
     }
-    cout << "#####"<<endl;
+    cout << "#####"<<endl; //分析完成
 }
 #endif

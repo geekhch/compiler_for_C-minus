@@ -108,31 +108,32 @@ void SynParser::declaration_list(SynNode *parent)
 
 void SynParser::declaration(SynNode *parent)
 {
-    uint32_t mk = lex.getMarker();
+    uint32_t mk = lex.getMarker(); //标记当前词法扫描器状态
     SynNode *cur = new SynNode{"declaration"};
     try
-    {
+    {   //是否为变量声明
         var_declaration(cur);
     }
     catch (runtime_error e1)
-    {   
+    {   //不是变量声明则回到词法扫描器之前状态
         cur->children.clear();
         lex.toMarker(mk);
         try
-        {
+        {//是否为函数声明
             fun_declaration(cur);
         }
         catch (runtime_error e2)
-        {
+        {//语法错误
             delete cur;
             cout <<"near line "<<exception_line<<": "<< e1.what() << " or " << e2.what() << endl;
             throw runtime_error("illegel declaration");
             // throw e;
         }
     }
-    //找到申明则将当前结点插入
+    //找到申明则将当前结点插入语法树
     parent->children.push_back(cur);
 }
+
 void SynParser::var_declaration(SynNode *parent)
 {
     SynNode *cur = new SynNode{"var_declaration"};
@@ -980,13 +981,13 @@ void SynParser::freeChildren(SynNode *parent)
 
 void SynParser::printTree(SynNode *root, int indent = 0)
 {
-    for (int i = 0; i < indent; ++i)
+    for (int i = 0; i < indent; ++i) //缩进量
         cout << ' ';
     if(root->type!=-1)
         cout << TYPE_NAME[root->type] << ": ";
     cout << root->word << endl;
     for (auto cld : root->children)
     {
-        printTree(cld, indent + 2);
+        printTree(cld, indent + 2);//递归实现孩子结点缩进量增加
     }
 }
